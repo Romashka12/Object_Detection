@@ -20,6 +20,8 @@ False positives
 
 No detection (depends on the detection threshold)
 
-![no detection](docs/images/faster_RCNN/detection_Faster_RCNN_273.png)
+![no detection](docs/images/faster_RCNN/detection_Faster_RCNN_3_no.png)
 
 For training steps, see scripts/training/Training_cleaned.ipynb
+
+Note that the repository is still "Work in progress"
