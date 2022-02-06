@@ -1,4 +1,13 @@
+from logging import WARNING
+import tensorflow as tf
+from object_detection.utils import config_util
+from object_detection.protos import pipeline_pb2
+from google.protobuf import text_format
+
 from string import Template
+
+from paths_creation import *
+
 
 config_file_template = """
 # Faster R-CNN with Resnet-152 (v1),
@@ -17,7 +26,6 @@ model {
     }
     feature_extractor {
       type: 'faster_rcnn_resnet152_keras'
-      batch_norm_trainable: true
     }
     first_stage_anchor_generator {
       grid_anchor_generator {
@@ -51,7 +59,7 @@ model {
     second_stage_box_predictor {
       mask_rcnn_box_predictor {
         use_dropout: false
-        dropout_keep_probability: 1.0
+        dropout_keep_probability: 0.7
         fc_hyperparams {
           op: FC
           regularizer {
@@ -81,11 +89,6 @@ model {
     }
     second_stage_localization_loss_weight: 2.0
     second_stage_classification_loss_weight: 1.0
-    use_static_shapes: true
-    use_matmul_crop_and_resize: true
-    clip_anchors_to_image: true
-    use_static_balanced_label_sampler: true
-    use_matmul_gather_in_matcher: true
   }
 }
 
@@ -99,9 +102,9 @@ train_config: {
     momentum_optimizer: {
       learning_rate: {
         cosine_decay_learning_rate {
-          learning_rate_base: 1e-4
+          learning_rate_base: $training_lr
           total_steps: $training_steps
-          warmup_learning_rate: 5e-5
+          warmup_learning_rate: $warmup_lr
           warmup_steps: $warmup_steps
         }
       }
@@ -113,8 +116,6 @@ train_config: {
   fine_tune_checkpoint_version: V2
   fine_tune_checkpoint: $chckpnt_path
   fine_tune_checkpoint_type: "detection"
-
-
   data_augmentation_options {
       random_horizontal_flip {
     }
@@ -124,7 +125,7 @@ train_config: {
 train_input_reader: {
   label_map_path: $label_path
   tf_record_input_reader {
-    input_path: "Tensorflow/workspace/images/train-?????-of-00008"
+    input_path: "COTS/workspace/images/train-?????-of-00008"
   }
 }
 
@@ -139,14 +140,22 @@ eval_input_reader: {
   shuffle: false
   num_epochs: 1
   tf_record_input_reader {
-    input_path: "Tensorflow/workspace/images/test-?????-of-00002"
+    input_path: "COTS/workspace/images/test-?????-of-00002"
   }
 }
 """
 
+TRAINING_STEPS = training_parameters["TRAINING_STEPS"]
+WARMUP_STEPS = training_parameters["WARM_UP_STEPS"]
+TRAINING_LR=training_parameters["TRAINING_LR"]
+WARMUP_LR=training_parameters["WARMUP_LR"]
+chkpnt_dir=os.path.join(paths['PRETRAINED_MODEL_PATH'], PRETRAINED_MODEL_NAME, 'checkpoint', 'ckpt-0')
+
 pipeline = Template(config_file_template).substitute(
     training_steps=TRAINING_STEPS, 
     warmup_steps=WARMUP_STEPS,
+    training_lr=TRAINING_LR,
+    warmup_lr=WARMUP_LR,
     label_path='"'+paths['ANNOTATION_PATH']+'/label_map.pbtxt'+'"',
     chckpnt_path='"'+chkpnt_dir+'"')
 

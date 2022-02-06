@@ -1,3 +1,14 @@
+from logging import WARNING
+import tensorflow as tf
+from object_detection.utils import config_util
+from object_detection.protos import pipeline_pb2
+from google.protobuf import text_format
+
+from string import Template
+
+from paths_creation import *
+
+config_file_template = """
 # SSD with EfficientNet-b0 + BiFPN feature extractor,
 # shared box predictor and focal loss (a.k.a EfficientDet-d0).
 # See EfficientDet, Tan et al, https://arxiv.org/abs/1911.09070
@@ -162,9 +173,9 @@ train_config: {
     momentum_optimizer: {
       learning_rate: {
         cosine_decay_learning_rate {
-          learning_rate_base: 5e-4
+          learning_rate_base: 1e-3
           total_steps: $training_steps
-          warmup_learning_rate: 5e-5
+          warmup_learning_rate: 1e-4
           warmup_steps: $warmup_steps
         }
       }
@@ -197,3 +208,21 @@ eval_input_reader: {
     input_path: "dataset/cots_val-?????-of-00004"
   }
 }
+"""
+
+TRAINING_STEPS = training_parameters["TRAINING_STEPS"]
+WARMUP_STEPS = training_parameters["WARM_UP_STEPS"]
+TRAINING_LR=training_parameters["TRAINING_LR"]
+WARMUP_LR=training_parameters["WARMUP_LR"]
+chkpnt_dir=os.path.join(paths['PRETRAINED_MODEL_PATH'], PRETRAINED_MODEL_NAME, 'checkpoint', 'ckpt-0')
+
+pipeline = Template(config_file_template).substitute(
+    training_steps=TRAINING_STEPS, 
+    warmup_steps=WARMUP_STEPS,
+    training_lr=TRAINING_LR,
+    warmup_lr=WARMUP_LR,
+    label_path='"'+paths['ANNOTATION_PATH']+'/label_map.pbtxt'+'"',
+    chckpnt_path='"'+chkpnt_dir+'"')
+
+with open(files['PIPELINE_CONFIG'], 'w') as f:
+    f.write(pipeline)
