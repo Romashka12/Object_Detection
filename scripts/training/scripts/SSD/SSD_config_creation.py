@@ -9,13 +9,13 @@ from string import Template
 from paths_creation import *
 
 config_file_template = """
-# SSD with EfficientNet-b0 + BiFPN feature extractor,
-# shared box predictor and focal loss (a.k.a EfficientDet-d0).
+# SSD with EfficientNet-b6 + BiFPN feature extractor,
+# shared box predictor and focal loss (a.k.a EfficientDet-d6).
 # See EfficientDet, Tan et al, https://arxiv.org/abs/1911.09070
 # See Lin et al, https://arxiv.org/abs/1708.02002
-# Initialized from an EfficientDet-D0 checkpoint.
+# Trained on COCO, initialized from an EfficientNet-b6 checkpoint.
 #
-# Train on GPU
+# Train on TPU-32
 
 model {
   ssd {
@@ -64,7 +64,7 @@ model {
     }
     box_predictor {
       weight_shared_convolutional_box_predictor {
-        depth: 64
+        depth: 288
         class_prediction_bias_init: -4.6
         conv_hyperparams {
           force_use_bias: true
@@ -86,18 +86,20 @@ model {
             epsilon: 0.001
           }
         }
-        num_layers_before_predictor: 3
+        num_layers_before_predictor: 5
         kernel_size: 3
         use_depthwise: true
       }
     }
     feature_extractor {
-      type: 'ssd_efficientnet-b0_bifpn_keras'
+      type: 'ssd_efficientnet-b5_bifpn_keras'
       bifpn {
         min_level: 3
         max_level: 7
-        num_iterations: 3
-        num_filters: 64
+        num_iterations: 8
+        num_filters: 288
+        # Use unweighted sum for stability.
+        combine_method: 'sum'
       }
       conv_hyperparams {
         force_use_bias: true
@@ -149,10 +151,10 @@ model {
 }
 
 train_config: {
-  fine_tune_checkpoint: "efficientdet_d0_coco17_tpu-32/checkpoint/ckpt-0"
+  fine_tune_checkpoint: $chckpnt_path
   fine_tune_checkpoint_version: V2
   fine_tune_checkpoint_type: "detection"
-  batch_size: 2
+  batch_size: 1
   sync_replicas: false
   startup_delay_steps: 0
   replicas_to_aggregate: 1
@@ -173,9 +175,9 @@ train_config: {
     momentum_optimizer: {
       learning_rate: {
         cosine_decay_learning_rate {
-          learning_rate_base: 1e-3
+          learning_rate_base: $training_lr
           total_steps: $training_steps
-          warmup_learning_rate: 1e-4
+          warmup_learning_rate: $warmup_lr
           warmup_steps: $warmup_steps
         }
       }
@@ -188,9 +190,9 @@ train_config: {
 }
 
 train_input_reader: {
-  label_map_path: "dataset/label_map.pbtxt"
+  label_map_path: $label_path
   tf_record_input_reader {
-    input_path: "dataset/cots_train-?????-of-00004"
+    input_path: "COTS/workspace/images/train-?????-of-00008"
   }
 }
 
@@ -201,11 +203,11 @@ eval_config: {
 }
 
 eval_input_reader: {
-  label_map_path: "dataset/label_map.pbtxt"
+  label_map_path: $label_path
   shuffle: false
   num_epochs: 1
   tf_record_input_reader {
-    input_path: "dataset/cots_val-?????-of-00004"
+    input_path: "COTS/workspace/images/test-?????-of-00002"
   }
 }
 """
@@ -214,7 +216,7 @@ TRAINING_STEPS = training_parameters["TRAINING_STEPS"]
 WARMUP_STEPS = training_parameters["WARM_UP_STEPS"]
 TRAINING_LR=training_parameters["TRAINING_LR"]
 WARMUP_LR=training_parameters["WARMUP_LR"]
-chkpnt_dir=os.path.join(paths['PRETRAINED_MODEL_PATH'], PRETRAINED_MODEL_NAME, 'checkpoint', 'ckpt-0')
+chkpnt_dir=os.path.join(paths['PRETRAINED_MODEL_PATH'], parameters["PRETRAINED_MODEL_NAME"], 'checkpoint', 'ckpt-0')
 
 pipeline = Template(config_file_template).substitute(
     training_steps=TRAINING_STEPS, 

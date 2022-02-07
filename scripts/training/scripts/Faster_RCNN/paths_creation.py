@@ -20,7 +20,8 @@ parameters= {"CUSTOM_MODEL_NAME":'FasterRCNN',
              'TF_RECORD_SCRIPT_NAME':'generate_tfrecord.py',
              'PRETRAINED_MODEL_URL':'http://download.tensorflow.org/models/object_detection/tf2/20200711/faster_rcnn_resnet152_v1_800x1333_coco17_gpu-8.tar.gz',
              'GDRIVE_SCRIPTS':"/content/drive/MyDrive/deep_learning/Object_detection/Coral_Reef/High_level/scripts",
-             'LABEL_MAP_NAME':'label_map.pbtxt'
+             'LABEL_MAP_NAME':'label_map.pbtxt',
+             'DRIVE_SAVE_PATH':"/content/drive/MyDrive/deep_learning/Object_detection/Coral_Reef"
              }
 
 paths = {

@@ -2,17 +2,17 @@ import os
 
 training_parameters={"TRAINING_STEPS":40000,
             "WARM_UP_STEPS":1000,
-            "WARMUP_LR":1e-3,
-            "TRAINING_LR":1e-4}
+            "WARMUP_LR":1e-4,
+            "TRAINING_LR":1e-3}
 
-
-parameters= {"CUSTOM_MODEL_NAME":'SSD_EfficientD7',
-             "PRETRAINED_MODEL_NAME":'efficientdet_d0_coco17_tpu-32',
+parameters= {"CUSTOM_MODEL_NAME":'SSD_EfficientD2',
+             "PRETRAINED_MODEL_NAME":'efficientdet_d2_coco17_tpu-32',
              "INITIAL_DATA_DIR":"/content/drive/MyDrive/deep_learning/Object_detection/Coral_Reef/data/tensorflow-great-barrier-reef.zip",
              'TF_RECORD_SCRIPT_NAME':'generate_tfrecord.py',
-             'PRETRAINED_MODEL_URL':'http://download.tensorflow.org/models/object_detection/tf2/20200711/efficientdet_d0_coco17_tpu-32.tar.gz',
+             'PRETRAINED_MODEL_URL':'http://download.tensorflow.org/models/object_detection/tf2/20200711/efficientdet_d2_coco17_tpu-32.tar.gz',
              'GDRIVE_SCRIPTS':"/content/drive/MyDrive/deep_learning/Object_detection/Coral_Reef/High_level/SSD_scripts",
-             'LABEL_MAP_NAME':'label_map.pbtxt'
+             'LABEL_MAP_NAME':'label_map.pbtxt',
+             'DRIVE_SAVE_PATH':"/content/drive/MyDrive/deep_learning/Object_detection/Coral_Reef"
              }
 
 paths = {
