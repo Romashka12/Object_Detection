@@ -24,8 +24,8 @@ No detection (depends on the detection threshold)
 
 For training steps, see scripts/training/Training_cleaned.ipynb
 
-# SSD
+# EfficientDet
 
-Single shot detection model utilises a fully convolutional approach without the region proposal stage. SSD has two components a backbone and a SSD head. Backbone is trained by classification algortihm and SSD layers are stacked on top of it.
+EfficientDet uses the architecture calles Single shot detection model. Single shot detection model utilises a fully convolutional approach without the region proposal stage, as in Faster RCNN. SSD has two components a backbone and a SSD head. Backbone is trained by classification algortihm and SSD layers are stacked on top of it.
 
 Note that the repository is still "Work in progress"
